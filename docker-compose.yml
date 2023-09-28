@@ -19,10 +19,11 @@ services:
   setup:
     profiles:
       - setup
-    build:
-      context: setup/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    # build:
+    #   context: setup/
+    #   args:
+    #     ELASTIC_VERSION: ${ELASTIC_VERSION}
+    image: artifactory.aecadmin.ir/ravan/elasticsearch/elasticsearch:${ELASTIC_VERSION}
     init: true
     volumes:
       - ./setup/entrypoint.sh:/entrypoint.sh:ro,Z
@@ -40,26 +41,27 @@ services:
     networks:
       - elk
     depends_on:
-      - elasticsearch1
+      - elasticsearch
       - elasticsearch2
       - elasticsearch3
 
-  elasticsearch1:
-    build:
-      context: elasticsearch/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+  elasticsearch:
+    # build:
+    #   context: elasticsearch/
+    #   args:
+    #     ELASTIC_VERSION: ${ELASTIC_VERSION}
+    image: artifactory.aecadmin.ir/ravan/elasticsearch/elasticsearch:${ELASTIC_VERSION}
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
-      - elasticsearch1:/usr/share/elasticsearch/data:Z
+      - elasticsearch:/usr/share/elasticsearch/data:Z
     ports:
       - 9200:9200
       - 9300:9300
     environment:
-      node.name: elasticsearch1
+      node.name: elasticsearch
       cluster.name: ${CLUSTER_NAME}
       discovery.seed_hosts: elasticsearch2,elasticsearch3
-      cluster.initial_master_nodes: elasticsearch1,elasticsearch2,elasticsearch3
+      cluster.initial_master_nodes: elasticsearch,elasticsearch2,elasticsearch3
       bootstrap.memory_lock: true
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       # Bootstrap password.
@@ -77,18 +79,19 @@ services:
     restart: unless-stopped
 
   elasticsearch2:
-    build:
-      context: elasticsearch/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    # build:
+    #   context: elasticsearch/
+    #   args:
+    #     ELASTIC_VERSION: ${ELASTIC_VERSION}
+    image: artifactory.aecadmin.ir/ravan/elasticsearch/elasticsearch:${ELASTIC_VERSION}
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - elasticsearch2:/usr/share/elasticsearch/data:Z
     environment:
       node.name: elasticsearch2
       cluster.name: ${CLUSTER_NAME}
-      discovery.seed_hosts: elasticsearch1,elasticsearch3
-      cluster.initial_master_nodes: elasticsearch1,elasticsearch2,elasticsearch3
+      discovery.seed_hosts: elasticsearch,elasticsearch3
+      cluster.initial_master_nodes: elasticsearch,elasticsearch2,elasticsearch3
       bootstrap.memory_lock: true
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       # Bootstrap password.
@@ -107,18 +110,19 @@ services:
 
 
   elasticsearch3:
-    build:
-      context: elasticsearch/
-      args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    # build:
+    #   context: elasticsearch/
+    #   args:
+    #     ELASTIC_VERSION: ${ELASTIC_VERSION}
+    image: artifactory.aecadmin.ir/ravan/elasticsearch/elasticsearch:${ELASTIC_VERSION}
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - elasticsearch3:/usr/share/elasticsearch/data:Z
     environment:
       node.name: elasticsearch3
       cluster.name: ${CLUSTER_NAME}
-      discovery.seed_hosts: elasticsearch1,elasticsearch2
-      cluster.initial_master_nodes: elasticsearch1,elasticsearch2,elasticsearch3
+      discovery.seed_hosts: elasticsearch,elasticsearch2
+      cluster.initial_master_nodes: elasticsearch,elasticsearch2,elasticsearch3
       bootstrap.memory_lock: true
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       # Bootstrap password.
@@ -156,7 +160,7 @@ services:
     networks:
       - elk
     depends_on:
-      - elasticsearch1
+      - elasticsearch
       - elasticsearch2
       - elasticsearch3
     restart: unless-stopped
@@ -175,7 +179,7 @@ services:
     networks:
       - elk
     depends_on:
-      - elasticsearch1
+      - elasticsearch
       - elasticsearch2
       - elasticsearch3
     restart: unless-stopped
@@ -185,6 +189,6 @@ networks:
     driver: bridge
 
 volumes:
-  elasticsearch1:
+  elasticsearch:
   elasticsearch2:
   elasticsearch3:
